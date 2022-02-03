@@ -1,0 +1,6 @@
+# requirements. 
+# Use
+# pip3 install -r requirements.txt
+
+python-docx
+docx2pdf

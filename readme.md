@@ -19,7 +19,7 @@ In, `main_certificate.py` folder. Change your participants and your name with pa
 
 Also, functions are very simple. You can implement your own versions as well.
 
-## Further Releases (Planning) )
+## Further Releases (Planning)
 - Adding e-mail automation to script?
 - Implementing for Linux users?
 

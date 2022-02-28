@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+
 import os
 from certificate import *
 from docx import Document
@@ -49,7 +48,7 @@ def create_docx_files(filename, list_participate, ambassador):
 # get certificate temple path
 certificate_file = "Data/Event Certificate Template.docx"
 # get participants path
-participate_file = "Data/"+("Participation List.csv" if (input("Test Mode?").lower())[0]=="n" else "temp.csv")
+participate_file = "Data/"+("Participant List.csv" if (input("Test Mode?").lower())[0]=="n" else "temp.csv")
 
 # Enter your name here [Ambassador Name]
 ambassador_name = input("Enter your name(This will be the host name on the certificates): ")

@@ -52,7 +52,7 @@ certificate_file = "Data Template/Event Certificate Template.docx"
 participate_file = "Data Template/"+("Event Participate Template.csv" if (input("Test Mode?").lower())[0]=="n" else "temp.csv")
 
 # Enter your name here [Ambassador Name]
-ambassador_name = "Sabyasachi Seal"
+ambassador_name = input("Enter your name(This will be the host name on the certificates): ")
 
 # get participants
 list_participate = get_participants(participate_file);

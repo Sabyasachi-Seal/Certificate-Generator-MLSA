@@ -1,7 +1,7 @@
 
 import os
 
-os.system("pip install -r requrirements.txt")
+os.system("pip install -r requirements.txt")
 
 from certificate import *
 from docx import Document

@@ -1,5 +1,8 @@
 
 import os
+
+os.system("pip install -r requrirements.txt")
+
 from certificate import *
 from docx import Document
 import csv
@@ -48,7 +51,7 @@ def create_docx_files(filename, list_participate, ambassador):
 # get certificate temple path
 certificate_file = "Data/Event Certificate Template.docx"
 # get participants path
-participate_file = "Data/"+("Participant List.csv" if (input("Test Mode?").lower())[0]=="n" else "temp.csv")
+participate_file = "Data/"+("Participant List.csv" if (input("Test Mode (Y/N): ").lower())[0]=="n" else "temp.csv")
 
 # Enter your name here [Ambassador Name]
 ambassador_name = input("Enter your name(This will be the host name on the certificates): ")

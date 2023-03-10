@@ -3,10 +3,6 @@
 This repo simply use a template certificate docx file and generates certificates
 both docx and pdf.
 
-# Google Cloud Event Certificate Generator
-
-This repo simply use a template certificate docx file and generates certificates
-both docx and pdf.
 ###  Working on Windows only.
 
 ## Run these 4 commands in your terminal

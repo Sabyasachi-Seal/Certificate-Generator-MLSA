@@ -38,7 +38,7 @@ def gethtmltemplate(htmltemplatepath=htmltemplatepath):
     return open(htmltemplatepath, "r").read()
 
 def getmail(name, event, ambassador):
-    sub = f"[{event}] Certificate of Completion"
+    sub = f"[MLSA] Certificate of Participation for {name}"
     html = gethtmltemplate(htmltemplatepath)
     body = html.format(name=name, event=event, ambassador=ambassador)
     return sub, body
@@ -62,8 +62,8 @@ def create_docx_files(filename, list_participate):
         # use original file everytime
         doc = Document(filename)
 
-        name = participate["Student Name"]
-        email = participate["Student Email"]
+        name = participate["Name"]
+        email = participate["Email"]
 
         replace_participant_name(doc, name)
         replace_event_name(doc, event)
@@ -81,7 +81,7 @@ def create_docx_files(filename, list_participate):
 
         sub, body = getmail(name, event, ambassador)
 
-        updatemailer(row=index, workbook=wb,  sheet=sheet, email=email, filepath=filepath, sub=sub, body=body, status="Send")
+        updatemailer(row=index+2, workbook=wb,  sheet=sheet, email=email, filepath=filepath, sub=sub, body=body, status="Send")
 
     
 # get certificate temple path

@@ -11,7 +11,8 @@ both docx and pdf.
 git clone https://github.com/Sabyasachi-Seal/Certificate-Generator-MLSA
 cd Certificate-Generator-MLSA
 ```
-Now Copy your progress report to the Data Folder and rename it as `ParticipantList.csv`
+Now Copy your Participant List to the Data Folder and rename it as `ParticipantList.csv`. <br>
+<e><i>The list must have the following fields: ```Name, Email```</i></e>. It can have more.
 ```
 pip install -r requirements.txt
 python main_certificate.py

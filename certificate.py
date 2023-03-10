@@ -31,10 +31,10 @@ def replace_participant_name(doc, name):
     replace_info(doc, name, string)
 
 def replace_event_name(doc, event):
-    string = "{INSERT EVENT NAME}"
+    string = "{EVENT NAME}"
     replace_info(doc, event, string)
 
 def replace_ambassador_name(doc, name):
-    string = "{student ambassador name}"
+    string = "{AMBASSADOR NAME}"
     replace_info(doc, name, string)
 

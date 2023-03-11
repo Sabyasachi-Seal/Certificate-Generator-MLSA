@@ -23,7 +23,7 @@ python main_certificate.py
 - You can change the email template file in the `Data` folder.
 
 ## How to send emails?
-- You can use the `Mail.xlms` file to send emails to the participants. Open this with Excel. Press ```Allow Content``` if required.
+- You can use the `Mail.xlsm` file to send emails to the participants. Open this with Excel. Press ```Allow Content``` if required.
 - Do not need to change anything in the file itself.
 - All you need to do is to search for ```View Macros```  in excel and then select the ```Send_Mails``` macro and then click on ```Run```.
 - Now open outlook and login.

@@ -5,7 +5,7 @@ both docx and pdf.
 
 ###  Working on Windows only.
 
-## Run these 4 commands in your terminal
+## Run these commands in your terminal
 
 ```
 git clone https://github.com/Sabyasachi-Seal/Certificate-Generator-MLSA

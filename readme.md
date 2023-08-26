@@ -12,11 +12,18 @@ git clone https://github.com/Sabyasachi-Seal/Certificate-Generator-MLSA
 cd Certificate-Generator-MLSA
 ```
 Now Copy your Participant List to the Data Folder and rename it as `ParticipantList.csv`. <br>
-<e><i>The list must have the following fields: ```Name, Email```</i></e>. It can have more.
+<e><i>The list must have the following fields: ```Name, Email```</i></e>. It may have more, but these 2 are essential.
 ```
 pip install -r requirements.txt
 python main_certificate.py
 ```
+
+## *Important*
+### Do not use this button to run your code:
+![Screenshot from 2023-08-26 10-36-02](https://github.com/Sabyasachi-Seal/Certificate-Generator-MLSA/assets/36451386/6e4ddf15-c97a-4c1a-9e64-9cd4db416511)
+
+### Use ```python main_certificate.py``` to run your code
+
 
 ## Customization
 - You can change the certificate template file in the `Data` folder.

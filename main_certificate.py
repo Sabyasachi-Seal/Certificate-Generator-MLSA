@@ -9,18 +9,8 @@ from docx import Document
 from docx2pdf import convert
 from openpyxl import Workbook, load_workbook
 
-mailerpath = "Data/Mail.xlsm"
-htmltemplatepath = "Data/mailtemplate.html"
+def updatemailer(row, workbook, sheet, email, filepath, sub, body, status, cc="", mailerpath="Data/Mail.xlsm"):
 
-# create output folder if not exist
-try:
-    os.makedirs("Output/Doc")
-    os.makedirs("Output/PDF")
-except OSError:
-    pass
-
-
-def updatemailer(row, workbook, sheet, email, filepath, sub, body, status, cc=""):
     sheet.cell(row=row, column=1).value = email
     sheet.cell(row=row, column=2).value = cc
     sheet.cell(row=row, column=3).value = sub
@@ -34,7 +24,7 @@ def getworkbook(filename):
     sheet = wb.active
     return wb, sheet
 
-def gethtmltemplate(htmltemplatepath=htmltemplatepath):
+def gethtmltemplate(htmltemplatepath="Data/mailtemplate.html"):
     return open(htmltemplatepath, "r").read()
 
 def getmail(name, event, ambassador):
@@ -83,17 +73,24 @@ def create_docx_files(filename, list_participate):
 
         updatemailer(row=index+2, workbook=wb,  sheet=sheet, email=email, filepath=filepath, sub=sub, body=body, status="Send")
 
-    
-# get certificate temple path
-certificate_file = "Data/Event Certificate Template.docx"
-# get participants path
-participate_file = "Data/"+("Participant List.csv" if (input("Test Mode (Y/N): ").lower())[0]=="n" else "temp.csv")
+def main(participant_list_name):
+    # create output folder if not exist
+    try:
+        os.makedirs("Output/Doc")
+        os.makedirs("Output/PDF")
+    except OSError:
+        pass
 
-# get participants
-list_participate = get_participants(participate_file);
+    # get certificate temple path
+    certificate_file = "Data/Event Certificate Template.docx"
+    # get participants path
+    participate_file = "Data/"+ participant_list_name
 
-# process data
-create_docx_files(certificate_file, list_participate)
+    # get participants
+    list_participate = get_participants(participate_file);
+
+    # process data
+    create_docx_files(certificate_file, list_participate)
 
 
 

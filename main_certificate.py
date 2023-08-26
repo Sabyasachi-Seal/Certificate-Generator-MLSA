@@ -3,6 +3,9 @@ import os
 
 os.system("pip install -r requirements.txt")
 
+mailerpath="Data/Mail.xlsm"
+htmltemplatepath="Data/mailtemplate.html"
+
 import csv
 from certificate import *
 from docx import Document
@@ -41,12 +44,12 @@ def get_participants(f):
             data.append(row) # append all results
     return data
 
-def create_docx_files(filename, list_participate):
+def create_docx_files(filename, list_participate, event, ambassador):
+
+    main_docx = 'Output/Doc/{}.docx'
+    main_pdf = 'Output/Pdf/{}.pdf'
 
     wb, sheet = getworkbook(mailerpath)
-
-    event = input("Enter the event name: ")
-    ambassador = input("Enter Ambassador Name: ")
 
     for index, participate in enumerate(list_participate):
         # use original file everytime
@@ -59,21 +62,21 @@ def create_docx_files(filename, list_participate):
         replace_event_name(doc, event)
         replace_ambassador_name(doc, ambassador)
 
-        doc.save('Output/Doc/{}.docx'.format(name))
+        doc.save(main_docx.format(name))
 
-        doc.save('Output/Doc/{}.docx'.format(name))
+        doc.save(main_docx.format(name))
 
         # ! if your program working slowly, comment this two line and open other 2 line.
-        print("Output/{}.pdf Creating".format(name))
-        convert('Output/Doc/{}.docx'.format(name), 'Output/Pdf/{}.pdf'.format(name))
+        print(main_pdf.format(name)+" Creating")
+        #convert(main_docx.format(name), main_pdf.format(name))
 
-        filepath = os.path.abspath('Output/Pdf/{}.pdf'.format(name))
+        #filepath = os.path.abspath(main_pdf.format(name))
 
         sub, body = getmail(name, event, ambassador)
 
-        updatemailer(row=index+2, workbook=wb,  sheet=sheet, email=email, filepath=filepath, sub=sub, body=body, status="Send")
+        #updatemailer(row=index+2, workbook=wb,  sheet=sheet, email=email, filepath=filepath, sub=sub, body=body, status="Send")
 
-def main(participant_list_name):
+def main(participant_list_name, event, ambassador):
     # create output folder if not exist
     try:
         os.makedirs("Output/Doc")
@@ -90,7 +93,7 @@ def main(participant_list_name):
     list_participate = get_participants(participate_file);
 
     # process data
-    create_docx_files(certificate_file, list_participate)
+    create_docx_files(certificate_file, list_participate, event, ambassador)
 
 
 

@@ -1,5 +1,7 @@
 # Microsoft Learn Student Ambassador Certificate Automation
 
+[![IMAGE ALT TEXT](http://img.youtube.com/vi/OUAbqdLDTZQ/0.jpg)](http://www.youtube.com/watch?v=OUAbqdLDTZQ "How to use Certificate Generator MLSA")
+
 This repo simply use a template certificate docx file and generates certificates
 both docx and pdf.
 

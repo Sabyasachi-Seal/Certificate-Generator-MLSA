@@ -1,7 +1,7 @@
 
 import os
 
-os.system("pip install -r requirements.txt")
+#os.system("pip install -r requirements.txt")
 
 import csv
 from certificate import *
@@ -45,10 +45,10 @@ def getmail(name, event, ambassador):
 
 def get_participants(f):
     data = [] # create empty list
-    with open(f, mode="r", encoding='utf-8') as file:
+    with open(f, mode="r", encoding='iso-8859-1') as file:
         csv_reader = csv.DictReader(file)
         for row in csv_reader:
-            data.append(row) # append all results
+            data.append(row)# append all results
     return data
 
 def create_docx_files(filename, list_participate):
@@ -87,7 +87,7 @@ def create_docx_files(filename, list_participate):
 # get certificate temple path
 certificate_file = "Data/Event Certificate Template.docx"
 # get participants path
-participate_file = "Data/"+("Participant List.csv" if (input("Test Mode (Y/N): ").lower())[0]=="n" else "temp.csv")
+participate_file = "Data/"+("Participant.csv" if (input("Test Mode (Y/N): ").lower())[0]=="n" else "temp.csv")
 
 # get participants
 list_participate = get_participants(participate_file);

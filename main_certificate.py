@@ -45,7 +45,7 @@ def getmail(name, event, ambassador):
 
 def get_participants(f):
     data = [] # create empty list
-    with open(f, mode="r", encoding='utf-8') as file:
+    with open(f, mode="r") as file:
         csv_reader = csv.DictReader(file)
         for row in csv_reader:
             data.append(row) # append all results

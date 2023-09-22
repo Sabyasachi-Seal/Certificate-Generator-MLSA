@@ -9,13 +9,13 @@ from docx import Document
 from docx2pdf import convert
 from openpyxl import Workbook, load_workbook
 
-mailerpath = "Data/Mail.xlsm"
-htmltemplatepath = "Data/mailtemplate.html"
+mailerpath = os.path.join("Data", "Mail.xlsm")
+htmltemplatepath = os.path.join("Data", "mailtemplate.html")
 
 # create output folder if not exist
 try:
-    os.makedirs("Output/Doc")
-    os.makedirs("Output/PDF")
+    os.makedirs(os.path.join("Output", "Doc"))
+    os.makedirs(os.path.join("Output", "PDF"))
 except OSError:
     pass
 

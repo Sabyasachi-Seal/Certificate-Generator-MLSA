@@ -6,3 +6,4 @@ python-docx
 docx2pdf
 openpyxl
 unoconv
+python-socketio

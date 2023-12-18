@@ -1,26 +1,47 @@
 
 import os
-
-#os.system("pip install -r requirements.txt")
-
-import csv
-from certificate import *
+import zipfile
+import uvicorn
+import platform
+import subprocess
+from typing import List
 from docx import Document
 from docx2pdf import convert
-import subprocess
-import os
-import zipfile
-import platform
-from openpyxl import Workbook, load_workbook
+from openpyxl import load_workbook
+from socketio import AsyncServer, ASGIApp
 from fastapi.responses import HTMLResponse 
-from fastapi import FastAPI, Form, File, UploadFile
 from fastapi.responses import FileResponse
-from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from certificate import *
+from fastapi.templating import Jinja2Templates
+from fastapi import FastAPI, Form, File, UploadFile, Request, WebSocket, Depends, WebSocket, WebSocketDisconnect
+from certificate import replace_participant_name, replace_event_name, replace_ambassador_name
+
+
 
 app = FastAPI()
 
+sio = AsyncServer(async_mode="asgi", cors_allowed_origins="*")
+app.add_middleware(ASGIApp, socketio=sio)
+
+class WebSocketConnectionManager:
+    def __init__(self):
+        self.active_connections: List = []
+
+    async def connect(self, websocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    def disconnect(self, websocket):
+        self.active_connections.remove(websocket)
+
+    async def send_personal_message(self, message, websocket):
+        await websocket.send_text(message)
+
+    async def broadcast(self, message):
+        for connection in self.active_connections:
+            await connection.send_text(message)
+
+manager = WebSocketConnectionManager()
 # Serve static files (e.g., CSS, JS) from the 'static' folder
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -36,6 +57,14 @@ try:
 except OSError:
     pass
 
+def clear_mailer_file(wb, sheet):
+
+    # Keep the first row (headers) and delete all other rows
+    for row in sheet.iter_rows(min_row=2, max_row=sheet.max_row):
+        for cell in row:
+            cell.value = None
+
+    wb.save(filename=mailerpath)
 
 def updatemailer(row, workbook, sheet, email, filepath, sub, body, status, cc=""):
     sheet.cell(row=row, column=1).value = email
@@ -46,7 +75,6 @@ def updatemailer(row, workbook, sheet, email, filepath, sub, body, status, cc=""
     sheet.cell(row=row, column=6).value = status
 
     workbook.save(filename = mailerpath)
-
 
 def getworkbook(filename):
     wb = load_workbook(filename=filename, read_only=False, keep_vba=True)
@@ -61,7 +89,6 @@ def getmail(name, event, ambassador):
     html = gethtmltemplate(htmltemplatepath)
     body = html.format(name=name, event=event, ambassador=ambassador)
     return sub, body
-
 
 async def process_csv(csv_file):
     participant_list = []
@@ -101,9 +128,11 @@ def zip_folder(folder_path, zip_filename, additional_files):
                 arcname = os.path.relpath(file_path, os.path.dirname(file_path))
                 zipf.write(file_path, arcname)
 
-def create_docx_files(filename, list_participate, event, ambassador):
+async def create_docx_files(filename, list_participate, event, ambassador, websocket):
 
     wb, sheet = getworkbook(mailerpath)
+
+    clear_mailer_file(wb, sheet)
 
     for index, participate in enumerate(list_participate):
         # use original file everytime
@@ -135,13 +164,24 @@ def create_docx_files(filename, list_participate, event, ambassador):
 
         updatemailer(row=index+2, workbook=wb,  sheet=sheet, email=email, filepath=filepath, sub=sub, body=body, status="Send")
 
-    
+        await websocket.send_text(f"PDF {name} has been generated.")
+
+    await websocket.send_text("All PDFs generated. Creating the zip file.")
+    await websocket.send_text("Sending the zip file to the user.")
+    await websocket.send_text("Done!")
+
+# Helper function to get the WebSocket
+def get_websocket():
+    return WebSocketConnectionManager.get_instance().get_websocket()
+
 @app.get("/", response_class=HTMLResponse)
-def read_item(request: dict):
+def read_item(request: Request):
     return templates.TemplateResponse("index.html", context={"request": request})
 
 @app.post("/generate_certificates")
-async def generate_certificates(event_name: str = Form(...), ambassador_name: str = Form(...), participant_file: UploadFile = File(...),):
+async def generate_certificates(event_name: str = Form(...), ambassador_name: str = Form(...), participant_file: UploadFile = File(...), websocket: WebSocket = Depends(get_websocket)):
+    
+    await websocket.accept()
     
     # get certificate temple path
     certificate_file = "Data/Event_Certificate_Template.docx"
@@ -149,7 +189,7 @@ async def generate_certificates(event_name: str = Form(...), ambassador_name: st
     # get participants
     list_participate = await process_csv(participant_file);
     
-    create_docx_files(certificate_file, list_participate, event=event_name, ambassador=ambassador_name)
+    await create_docx_files(certificate_file, list_participate, event=event_name, ambassador=ambassador_name, websocket=websocket)
 
     # Zip the generated certificates
     zip_filename = "certificates.zip"
@@ -164,8 +204,31 @@ async def generate_certificates(event_name: str = Form(...), ambassador_name: st
     # Send the zip file to the user
     return FileResponse(zip_filename, media_type="application/zip", headers={"Content-Disposition": "attachment; filename=certificates.zip"})
 
-if __name__ == '__main__':
-    import uvicorn
+# Define WebSocket endpoint
+@sio.event
+async def connect(sid, environ):
+    print(f"WebSocket {sid} connected.")
+    await manager.connect(sid)
 
+@sio.event
+async def disconnect(sid):
+    print(f"WebSocket {sid} disconnected.")
+    await manager.disconnect(sid)
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await manager.connect(websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            if data == "close":
+                await manager.disconnect(websocket)
+                break
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+
+
+
+if __name__ == '__main__':
     # Run the app with Uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)

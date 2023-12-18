@@ -7,11 +7,13 @@
 </head>
 <body>
     <h1>Certificate Generator</h1>
-    <form action="/generate_certificates/" method="post">
+    <form action="/generate_certificates/" method="post" enctype="multipart/form-data">
         <label for="event_name">Event Name:</label>
         <input type="text" name="event_name" required><br>
         <label for="ambassador_name">Ambassador Name:</label>
         <input type="text" name="ambassador_name" required><br>
+        <label for="participant_file">Participant CSV File:</label>
+        <input type="file" name="participant_file" accept=".csv" required><br>
         <button type="submit">Generate Certificates</button>
     </form>
 </body>

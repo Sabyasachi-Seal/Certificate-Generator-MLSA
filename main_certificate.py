@@ -1,4 +1,3 @@
-
 import os
 import zipfile
 import uvicorn
@@ -13,15 +12,19 @@ from fastapi.responses import HTMLResponse
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi import FastAPI, Form, File, UploadFile, Request, WebSocket, Depends, WebSocket, WebSocketDisconnect
 from certificate import replace_participant_name, replace_event_name, replace_ambassador_name
-
-
+from fastapi import FastAPI, Form, File, UploadFile, Request, WebSocket, WebSocketDisconnect
+from starlette.middleware import Middleware
+from starlette.middleware.trustedhost import TrustedHostMiddleware
+from starlette.websockets import WebSocketDisconnect
 
 app = FastAPI()
 
 sio = AsyncServer(async_mode="asgi", cors_allowed_origins="*")
-app.add_middleware(ASGIApp, socketio=sio)
+app.add_middleware(
+    TrustedHostMiddleware, 
+    allowed_hosts=["*"],  # Adjust this based on your deployment needs
+)
 
 class WebSocketConnectionManager:
     def __init__(self):
@@ -42,6 +45,7 @@ class WebSocketConnectionManager:
             await connection.send_text(message)
 
 manager = WebSocketConnectionManager()
+
 # Serve static files (e.g., CSS, JS) from the 'static' folder
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -74,7 +78,7 @@ def updatemailer(row, workbook, sheet, email, filepath, sub, body, status, cc=""
     sheet.cell(row=row, column=5).value = filepath
     sheet.cell(row=row, column=6).value = status
 
-    workbook.save(filename = mailerpath)
+    workbook.save(filename=mailerpath)
 
 def getworkbook(filename):
     wb = load_workbook(filename=filename, read_only=False, keep_vba=True)
@@ -179,10 +183,15 @@ def read_item(request: Request):
     return templates.TemplateResponse("index.html", context={"request": request})
 
 @app.post("/generate_certificates")
-async def generate_certificates(event_name: str = Form(...), ambassador_name: str = Form(...), participant_file: UploadFile = File(...), websocket: WebSocket = Depends(get_websocket)):
+async def generate_certificates(
+    event_name: str = Form(...),
+    ambassador_name: str = Form(...),
+    participant_file: UploadFile = File(...)
+):
     
-    await websocket.accept()
-    
+    websocket = manager.active_connections[0] 
+    # await websocket.accept()
+
     # get certificate temple path
     certificate_file = "Data/Event_Certificate_Template.docx"
 
@@ -226,8 +235,6 @@ async def websocket_endpoint(websocket: WebSocket):
                 break
     except WebSocketDisconnect:
         manager.disconnect(websocket)
-
-
 
 if __name__ == '__main__':
     # Run the app with Uvicorn

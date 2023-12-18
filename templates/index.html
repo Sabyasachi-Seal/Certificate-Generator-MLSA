@@ -16,5 +16,32 @@
         <input type="file" name="participant_file" accept=".csv" required><br>
         <button type="submit">Generate Certificates</button>
     </form>
+    <div id="messages"></div>
+
+    <script>
+        const socket = new WebSocket("ws://localhost:8000/ws");
+
+        socket.onopen = (event) => {
+            console.log("WebSocket connection opened:", event);
+
+            // You can send a message to the server once the connection is open
+            // socket.send("Hello, Server!");
+        };
+
+        socket.onmessage = (event) => {
+            console.log("WebSocket message received:", event);
+
+            const messagesDiv = document.getElementById("messages");
+            messagesDiv.innerHTML += `<p>${event.data}</p>`;
+        };
+
+        socket.onclose = (event) => {
+            console.log("WebSocket connection closed:", event);
+        };
+
+        socket.onerror = (event) => {
+            console.error("WebSocket error:", event);
+        };
+    </script>
 </body>
 </html>

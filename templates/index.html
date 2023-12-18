@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate Generator</title>
+</head>
+<body>
+    <h1>Certificate Generator</h1>
+    <form action="/generate_certificates/" method="post">
+        <label for="event_name">Event Name:</label>
+        <input type="text" name="event_name" required><br>
+        <label for="ambassador_name">Ambassador Name:</label>
+        <input type="text" name="ambassador_name" required><br>
+        <button type="submit">Generate Certificates</button>
+    </form>
+</body>
+</html>

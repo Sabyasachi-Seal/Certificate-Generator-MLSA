@@ -3,20 +3,18 @@ import zipfile
 import uvicorn
 import platform
 import subprocess
-from typing import List
 from docx import Document
 from docx2pdf import convert
+from socketio import AsyncServer
+from typing import AsyncGenerator
 from openpyxl import load_workbook
-from socketio import AsyncServer, ASGIApp
 from fastapi.responses import HTMLResponse 
-from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from certificate import replace_participant_name, replace_event_name, replace_ambassador_name
-from fastapi import FastAPI, Form, File, UploadFile, Request, WebSocket, WebSocketDisconnect
-from starlette.middleware import Middleware
+from fastapi.responses import StreamingResponse
 from starlette.middleware.trustedhost import TrustedHostMiddleware
-from starlette.websockets import WebSocketDisconnect
+from certificate import replace_participant_name, replace_event_name, replace_ambassador_name
+from fastapi import FastAPI, Form, File, UploadFile, BackgroundTasks, Request, WebSocket, WebSocketDisconnect
 
 app = FastAPI()
 
@@ -26,26 +24,6 @@ app.add_middleware(
     allowed_hosts=["*"],  # Adjust this based on your deployment needs
 )
 
-class WebSocketConnectionManager:
-    def __init__(self):
-        self.active_connections: List = []
-
-    async def connect(self, websocket):
-        await websocket.accept()
-        self.active_connections.append(websocket)
-
-    def disconnect(self, websocket):
-        self.active_connections.remove(websocket)
-
-    async def send_personal_message(self, message, websocket):
-        await websocket.send_text(message)
-
-    async def broadcast(self, message):
-        for connection in self.active_connections:
-            await connection.send_text(message)
-
-manager = WebSocketConnectionManager()
-
 # Serve static files (e.g., CSS, JS) from the 'static' folder
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -53,6 +31,7 @@ templates = Jinja2Templates(directory="templates")
 
 mailerpath = "Data/Mail.xlsm"
 htmltemplatepath = "Data/mailtemplate.html"
+zip_filename = "certificates.zip"
 
 # create output folder if not exist
 try:
@@ -60,6 +39,10 @@ try:
     os.makedirs("Output/PDF")
 except OSError:
     pass
+
+async def get_data_from_file() -> AsyncGenerator[bytes, None]:
+    with open(file=zip_filename, mode="rb") as file_like:
+        yield file_like.read()
 
 def clear_mailer_file(wb, sheet):
 
@@ -132,7 +115,7 @@ def zip_folder(folder_path, zip_filename, additional_files):
                 arcname = os.path.relpath(file_path, os.path.dirname(file_path))
                 zipf.write(file_path, arcname)
 
-async def create_docx_files(filename, list_participate, event, ambassador, websocket):
+async def create_docx_files(filename, list_participate, event, ambassador):
 
     wb, sheet = getworkbook(mailerpath)
 
@@ -168,19 +151,13 @@ async def create_docx_files(filename, list_participate, event, ambassador, webso
 
         updatemailer(row=index+2, workbook=wb,  sheet=sheet, email=email, filepath=filepath, sub=sub, body=body, status="Send")
 
-        await websocket.send_text(f"PDF {name} has been generated.")
-
-    await websocket.send_text("All PDFs generated. Creating the zip file.")
-    await websocket.send_text("Sending the zip file to the user.")
-    await websocket.send_text("Done!")
-
-# Helper function to get the WebSocket
-def get_websocket():
-    return WebSocketConnectionManager.get_instance().get_websocket()
-
 @app.get("/", response_class=HTMLResponse)
 def read_item(request: Request):
     return templates.TemplateResponse("index.html", context={"request": request})
+
+async def get_statinfo():
+    with open(zip_filename, "rb") as file:
+        yield file.read()
 
 @app.post("/generate_certificates")
 async def generate_certificates(
@@ -188,9 +165,6 @@ async def generate_certificates(
     ambassador_name: str = Form(...),
     participant_file: UploadFile = File(...)
 ):
-    
-    websocket = manager.active_connections[0] 
-    # await websocket.accept()
 
     # get certificate temple path
     certificate_file = "Data/Event_Certificate_Template.docx"
@@ -198,10 +172,7 @@ async def generate_certificates(
     # get participants
     list_participate = await process_csv(participant_file);
     
-    await create_docx_files(certificate_file, list_participate, event=event_name, ambassador=ambassador_name, websocket=websocket)
-
-    # Zip the generated certificates
-    zip_filename = "certificates.zip"
+    await create_docx_files(certificate_file, list_participate, event=event_name, ambassador=ambassador_name)
 
     additional_files = [mailerpath]
 
@@ -210,31 +181,7 @@ async def generate_certificates(
     os.system("rm -rf Output/Doc/*")
     os.system("rm -rf Output/PDF/*")
 
-    # Send the zip file to the user
-    return FileResponse(zip_filename, media_type="application/zip", headers={"Content-Disposition": "attachment; filename=certificates.zip"})
-
-# Define WebSocket endpoint
-@sio.event
-async def connect(sid, environ):
-    print(f"WebSocket {sid} connected.")
-    await manager.connect(sid)
-
-@sio.event
-async def disconnect(sid):
-    print(f"WebSocket {sid} disconnected.")
-    await manager.disconnect(sid)
-
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await manager.connect(websocket)
-    try:
-        while True:
-            data = await websocket.receive_text()
-            if data == "close":
-                await manager.disconnect(websocket)
-                break
-    except WebSocketDisconnect:
-        manager.disconnect(websocket)
+    return StreamingResponse(get_data_from_file(), media_type="application/zip")
 
 if __name__ == '__main__':
     # Run the app with Uvicorn

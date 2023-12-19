@@ -4,7 +4,7 @@
         "value": 50,
         "density": { "enable": true, "value_area": 1000 }
       },
-      "color": { "value": ["", "#26b643", "#ebb105", "#e33729"] },
+      "color": { "value": ["#3e7bf4", "#26b643", "#ebb105", "#e33729"] },
       "shape": {
         "type": "circle",
         "stroke": { "width": 0, "color": "#009688" },

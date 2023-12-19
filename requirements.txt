@@ -7,3 +7,7 @@ docx2pdf
 openpyxl
 unoconv
 python-socketio
+uvicorn
+fastapi
+jinja2
+python-multipart

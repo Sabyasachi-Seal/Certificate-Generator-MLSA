@@ -11,25 +11,10 @@ from openpyxl import load_workbook
 from fastapi.responses import HTMLResponse 
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import StreamingResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Form, File, UploadFile, Request
-from starlette.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.responses import StreamingResponse, FileResponse
 from certificate import replace_participant_name, replace_event_name, replace_ambassador_name
-
-# app = FastAPI()
-
-# sio = AsyncServer(async_mode="asgi", cors_allowed_origins="*")
-
-# app.add_middleware(
-#     CORSMiddleware,
-#     # TrustedHostMiddleware, 
-#     allowed_hosts=["*"], 
-#     allow_origins=["*"],
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
 
 app = FastAPI()
 
@@ -49,7 +34,7 @@ templates = Jinja2Templates(directory="templates")
 
 mailerpath = "Data/Mail.xlsm"
 htmltemplatepath = "Data/mailtemplate.html"
-zip_filename = "certificates.zip"
+zip_filename = "static/certificates.zip"
 
 # create output folder if not exist
 try:

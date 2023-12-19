@@ -84,14 +84,26 @@
     
       <script>
         async function startGeneratingCertificates() {
+          
           const generateButton = document.getElementById("generateButton");
+
+          // Check if the form is valid
+          if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+          }
+
+          // Disable the button to prevent multiple clicks
+          generateButton.disabled = true;
+
+
           generateButton.textContent = "Generating Certificates";
-          generateButton.classList.remove("animate-pulse");
-          generateButton.classList.add("animate-bounce");
+          generateButton.classList.remove("animate-bounce");
+          generateButton.classList.add("animate-pulse");
       
           const form = document.getElementById("certificateForm");
           const formData = new FormData(form);
-      
+
           // Send a POST request to the server
           await fetch("/generate_certificates", {
             method: "POST",
@@ -100,7 +112,10 @@
       
           // Update the button text and initiate the download
           generateButton.textContent = "Download Certificates";
+          generateButton.classList.remove("bg-red-600");
+          generateButton.classList.add("bg-green-700");
           generateButton.onclick = () => initiateDownload();
+          generateButton.classList.remove("animate-pulse");
         }
       
         function initiateDownload() {

@@ -193,6 +193,7 @@ async def generate_certificates(
 
     os.system("rm -rf Output/Doc/*")
     os.system("rm -rf Output/PDF/*")
+    os.system("rm -rf static/certificates.zip")
 
     return StreamingResponse(get_data_from_file(), media_type="application/zip")
 

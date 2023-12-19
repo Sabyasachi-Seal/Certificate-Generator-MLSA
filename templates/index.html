@@ -6,9 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
   <title>MLSA - Certificate Generator</title>
-  <link rel="icon"
-    target = "_blank" href="title_logo.png"
-    type="image/icon type">
+  <link rel="icon" href="title_logo.png" type="image/icon type">
   <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
   <script src="https://cdn.jsdelivr.net/npm/particles.js/particles.min.js"></script>
 </head>
@@ -87,29 +85,41 @@
           
           const generateButton = document.getElementById("generateButton");
 
+          const form = document.getElementById("certificateForm");
+
           // Check if the form is valid
           if (!form.checkValidity()) {
             form.reportValidity();
             return;
           }
 
-          // Disable the button to prevent multiple clicks
-          generateButton.disabled = true;
-
-
           generateButton.textContent = "Generating Certificates";
           generateButton.classList.remove("animate-bounce");
           generateButton.classList.add("animate-pulse");
       
-          const form = document.getElementById("certificateForm");
           const formData = new FormData(form);
 
-          // Send a POST request to the server
-          await fetch("/generate_certificates", {
-            method: "POST",
-            body: formData,
-          });
-      
+          await Promise.all([]);
+
+          async function percentage() {
+            for (let progress = 0; progress <= 100; progress += 1) {
+              // Update progress
+              generateButton.textContent = `Generating Certificates: ${progress}%`;
+              // Simulate delay (adjust the timeout duration accordingly)
+              await new Promise((resolve) => setTimeout(resolve, 250));
+            }
+          }
+
+          async function makefile(){
+            // Send a POST request to the server
+            await fetch("/generate_certificates", {
+              method: "POST",
+              body: formData,
+            });
+          }
+
+          await Promise.all([makefile(), percentage()]);
+
           // Update the button text and initiate the download
           generateButton.textContent = "Download Certificates";
           generateButton.classList.remove("bg-red-600");

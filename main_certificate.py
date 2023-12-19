@@ -180,7 +180,7 @@ def read_item(request: Request):
 @app.get("/{filepath}")
 def get_file(filepath: str):
     file_path = os.path.join("./static", filepath)
-    print(file_path)
+    # print(file_path)
     return FileResponse(file_path)
 
 async def get_statinfo():

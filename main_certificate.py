@@ -32,9 +32,9 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 templates = Jinja2Templates(directory="templates")
 
-mailerpath = "Data/Mail.xlsm"
-htmltemplatepath = "Data/mailtemplate.html"
-zip_filename = "static/certificates.zip"
+mailerpath = "./Data/Mail.xlsm"
+htmltemplatepath = "./Data/mailtemplate.html"
+zip_filename = "./static/certificates.zip"
 
 # create output folder if not exist
 try:
@@ -102,9 +102,13 @@ def convert_to_pdf(input_path, output_path):
     ]
     process = subprocess.Popen(cmd, stderr=subprocess.PIPE)
     output, error = process.communicate()
+    print(output, error)
     return output, error
 
 def zip_folder(folder_path, zip_filename, additional_files):
+
+    print(os.listdir(folder_path))
+
     with zipfile.ZipFile(zip_filename, 'w', zipfile.ZIP_DEFLATED) as zipf:
         for root, dirs, files in os.walk(folder_path):
             for file in files:
@@ -124,6 +128,9 @@ async def create_docx_files(filename, list_participate, event, ambassador):
 
     clear_mailer_file(wb, sheet)
 
+    os.system("rm -rf Output/Doc/*")
+    os.system("rm -rf Output/PDF/*")
+
     for index, participate in enumerate(list_participate):
         # use original file everytime
         name = participate["Name"]
@@ -138,17 +145,17 @@ async def create_docx_files(filename, list_participate, event, ambassador):
         replace_event_name(doc, event)
         replace_ambassador_name(doc, ambassador)
 
-        doc.save('Output/Doc/{}.docx'.format(name))
+        doc.save('./Output/Doc/{}.docx'.format(name))
 
-        # ! if your program working slowly, comment this two line and open other 2 line.
+        print(os.listdir("./Output/Doc/"))
+
+        convert_to_pdf('./Output/Doc/{}.docx'.format(name), './Output/PDF/{}.pdf'.format(name))
+
+        print(os.listdir("./Output/PDF/"))
+
         print("Output/{}.pdf Creating".format(name))
 
-        if platform.system() == 'Windows':
-            convert('Output/Doc/{}.docx'.format(name), 'Output/Pdf/{}.pdf'.format(name))
-        else:
-            convert_to_pdf('Output/Doc/{}.docx'.format(name), 'Output/PDF/{}.pdf'.format(name))
-
-        filepath = os.path.abspath('Output/PDF/{}.pdf'.format(name))
+        filepath = os.path.abspath('./Output/PDF/{}.pdf'.format(name))
 
         sub, body = getmail(name, event, ambassador)
 
@@ -180,7 +187,7 @@ async def generate_certificates(
 ):
 
     # get certificate temple path
-    certificate_file = "Data/Event_Certificate_Template.docx"
+    certificate_file = "./Data/Event_Certificate_Template.docx"
 
     # get participants
     list_participate = await process_csv(participant_file);
@@ -189,10 +196,9 @@ async def generate_certificates(
 
     additional_files = [mailerpath]
 
-    zip_folder("Output/PDF", zip_filename, additional_files)
+    zip_folder("./Output/PDF", zip_filename, additional_files)
 
-    os.system("rm -rf Output/Doc/*")
-    os.system("rm -rf Output/PDF/*")
+    
 
     return StreamingResponse(get_data_from_file(), media_type="application/zip")
 

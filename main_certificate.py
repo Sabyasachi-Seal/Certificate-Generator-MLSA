@@ -11,17 +11,35 @@ from openpyxl import load_workbook
 from fastapi.responses import HTMLResponse 
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, FileResponse
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, Form, File, UploadFile, Request
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 from certificate import replace_participant_name, replace_event_name, replace_ambassador_name
-from fastapi import FastAPI, Form, File, UploadFile, BackgroundTasks, Request, WebSocket, WebSocketDisconnect
+
+# app = FastAPI()
+
+# sio = AsyncServer(async_mode="asgi", cors_allowed_origins="*")
+
+# app.add_middleware(
+#     CORSMiddleware,
+#     # TrustedHostMiddleware, 
+#     allowed_hosts=["*"], 
+#     allow_origins=["*"],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 
 app = FastAPI()
 
-sio = AsyncServer(async_mode="asgi", cors_allowed_origins="*")
+origins = ["*"]  # Adjust this to your frontend's actual origin(s)
 app.add_middleware(
-    TrustedHostMiddleware, 
-    allowed_hosts=["*"],  # Adjust this based on your deployment needs
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Serve static files (e.g., CSS, JS) from the 'static' folder
@@ -154,6 +172,16 @@ async def create_docx_files(filename, list_participate, event, ambassador):
 @app.get("/", response_class=HTMLResponse)
 def read_item(request: Request):
     return templates.TemplateResponse("index.html", context={"request": request})
+
+@app.get("/", response_class=HTMLResponse)
+def read_item(request: Request):
+    return templates.TemplateResponse("index.html", context={"request": request})
+
+@app.get("/{filepath}")
+def get_file(filepath: str):
+    file_path = os.path.join("./static", filepath)
+    print(file_path)
+    return FileResponse(file_path)
 
 async def get_statinfo():
     with open(zip_filename, "rb") as file:

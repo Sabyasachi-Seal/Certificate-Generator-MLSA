@@ -99,7 +99,50 @@
       
           const formData = new FormData(form);
 
-          await Promise.all([]);
+          function isCSVFile(fileName) {
+            return fileName.toLowerCase().endsWith(".csv");
+          }
+
+          function hasNameAndEmailFields(csvContent) {
+            // Split CSV content into lines
+            const lines = csvContent.split('\n');
+
+            // Check if the first line (header) contains 'Name' and 'Email' fields
+            const headerFields = lines[0].split(',');
+            return headerFields.includes('Name') && headerFields.includes('Email');
+          }
+
+          async function readFileAsText(file) {
+            return new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = (event) => resolve(event.target.result);
+              reader.onerror = (error) => reject(error);
+              reader.readAsText(file);
+            });
+          }
+
+          // Check if the uploaded file has a ".csv" extension
+          const participantFile = formData.get("participant_file");
+
+          if (!isCSVFile(participantFile.name)) {
+            alert("Please upload a CSV file with fields 'Name' and 'Email'");
+            generateButton.textContent = "Generate Certificates";
+            generateButton.classList.add("animate-bounce");
+            generateButton.classList.remove("animate-pulse");
+            return;
+          }
+
+          // Read the contents of the CSV file
+          const fileContent = await readFileAsText(participantFile);
+
+          // Check if the 'Name' and 'Email' fields are present
+          if (!hasNameAndEmailFields(fileContent)) {
+            alert("The CSV file must have 'Name' and 'Email' fields.");
+            generateButton.textContent = "Generate Certificates";
+            generateButton.classList.add("animate-bounce");
+            generateButton.classList.remove("animate-pulse");
+            return;
+          }
 
           async function percentage() {
             for (let progress = 0; progress <= 100; progress += 1) {
@@ -111,6 +154,7 @@
           }
 
           async function makefile(){
+
             // Send a POST request to the server
             await fetch("/generate_certificates", {
               method: "POST",

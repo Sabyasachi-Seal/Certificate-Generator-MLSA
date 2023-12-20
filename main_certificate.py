@@ -1,11 +1,9 @@
 import os
+import csv
 import zipfile
 import uvicorn
-import platform
 import subprocess
 from docx import Document
-from docx2pdf import convert
-from socketio import AsyncServer
 from typing import AsyncGenerator
 from openpyxl import load_workbook
 from fastapi.responses import HTMLResponse 
@@ -85,7 +83,8 @@ async def process_csv(csv_file):
     content = (await csv_file.read()).decode("utf-8").splitlines()
 
     # Skip header line
-    _ = content.pop(0)
+    if len(content) > 0:
+        _ = content.pop(0)
 
     for line in content:
         name, email = line.split(",")
@@ -175,12 +174,27 @@ async def get_statinfo():
     with open(zip_filename, "rb") as file:
         yield file.read()
 
+def is_valid_csv(file_content: str) -> bool:
+    try:
+        # Attempt to parse the CSV content
+        csv.reader(file_content.splitlines())
+        return True
+    except csv.Error:
+        return False
+
 @app.post("/generate_certificates")
 async def generate_certificates(
     event_name: str = Form(...),
     ambassador_name: str = Form(...),
     participant_file: UploadFile = File(...)
 ):
+
+    # Read the content of the uploaded file
+    content = await participant_file.read()
+
+    # Check if the content is a valid CSV
+    if not is_valid_csv(content.decode()):
+        return {"status_code": 400, "message": "Invalid CSV file"}
 
     # get certificate temple path
     certificate_file = "./Data/Event_Certificate_Template.docx"

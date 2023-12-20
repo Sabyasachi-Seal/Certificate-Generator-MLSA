@@ -165,10 +165,6 @@ async def create_docx_files(filename, list_participate, event, ambassador):
 def read_item(request: Request):
     return templates.TemplateResponse("index.html", context={"request": request})
 
-@app.get("/", response_class=HTMLResponse)
-def read_item(request: Request):
-    return templates.TemplateResponse("index.html", context={"request": request})
-
 @app.get("/{filepath}")
 def get_file(filepath: str):
     file_path = os.path.join("./static", filepath)

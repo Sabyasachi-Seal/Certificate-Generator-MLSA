@@ -1,4 +1,10 @@
-# Microsoft Learn Student Ambassador Certificate Automation
+# Microsoft Learn Student Ambassador Certificate Generator
+
+### Use it now: https://mlsa-certificate-generator.iamseal.tech/
+
+---
+
+(Only follow the instructions below if you are generating manually)
 
 ### Check out this video below:
 

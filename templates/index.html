@@ -108,7 +108,8 @@
             const lines = csvContent.split('\n');
 
             // Check if the first line (header) contains 'Name' and 'Email' fields
-            const headerFields = lines[0].split(',');
+            const header = lines[0].trim();
+            const headerFields = header.split(',');
             return headerFields.includes('Name') && headerFields.includes('Email');
           }
 
@@ -125,7 +126,7 @@
           const participantFile = formData.get("participant_file");
 
           if (!isCSVFile(participantFile.name)) {
-            alert("Please upload a CSV file with fields 'Name' and 'Email'");
+            alert("Please upload a CSV file");
             generateButton.textContent = "Generate Certificates";
             generateButton.classList.add("animate-bounce");
             generateButton.classList.remove("animate-pulse");

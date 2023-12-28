@@ -3,6 +3,7 @@ import csv
 import zipfile
 import uvicorn
 import subprocess
+import aiofiles
 from docx import Document
 from typing import AsyncGenerator
 from openpyxl import load_workbook
@@ -11,7 +12,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Form, File, UploadFile, Request
-from fastapi.responses import StreamingResponse, FileResponse
+from fastapi.responses import FileResponse
 from certificate import replace_participant_name, replace_event_name, replace_ambassador_name
 
 app = FastAPI()
@@ -33,6 +34,7 @@ templates = Jinja2Templates(directory="templates")
 mailerpath = "./Data/Mail.xlsm"
 htmltemplatepath = "./Data/mailtemplate.html"
 zip_filename = "./static/certificates.zip"
+csv_file_path = "./Data/participants.csv"
 
 # create output folder if not exist
 try:
@@ -79,16 +81,21 @@ def getmail(name, event, ambassador):
     return sub, body
 
 async def process_csv(csv_file):
+
     participant_list = []
-    content = (await csv_file.read()).decode("utf-8").splitlines()
 
-    # Skip header line
-    if len(content) > 0:
-        _ = content.pop(0)
+    first = True
 
-    for line in content:
-        name, email = line.split(",")
-        participant_list.append({"Name": name, "Email": email})
+    with open(csv_file) as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        for line in csv_reader:
+            if first:
+                first = False
+                continue
+            name, email = line
+            participant_list.append({"Name": name.strip(), "Email": email.strip()})
+
+    # print(participant_list)
 
     return participant_list
 
@@ -101,12 +108,12 @@ def convert_to_pdf(input_path, output_path):
     ]
     process = subprocess.Popen(cmd, stderr=subprocess.PIPE)
     output, error = process.communicate()
-    print(output, error)
+    # print(output, error)
     return output, error
 
 def zip_folder(folder_path, zip_filename, additional_files):
 
-    print(os.listdir(folder_path))
+    # print(os.listdir(folder_path))
 
     with zipfile.ZipFile(zip_filename, 'w', zipfile.ZIP_DEFLATED) as zipf:
         for root, dirs, files in os.walk(folder_path):
@@ -146,13 +153,13 @@ async def create_docx_files(filename, list_participate, event, ambassador):
 
         doc.save('./Output/Doc/{}.docx'.format(name))
 
-        print(os.listdir("./Output/Doc/"))
+        # print(os.listdir("./Output/Doc/"))
 
         convert_to_pdf('./Output/Doc/{}.docx'.format(name), './Output/PDF/{}.pdf'.format(name))
 
-        print(os.listdir("./Output/PDF/"))
+        # print(os.listdir("./Output/PDF/"))
 
-        print("Output/{}.pdf Creating".format(name))
+        # print("Output/{}.pdf Creating".format(name))
 
         filepath = os.path.abspath('./Output/PDF/{}.pdf'.format(name))
 
@@ -189,18 +196,22 @@ async def generate_certificates(
     participant_file: UploadFile = File(...)
 ):
 
-    # Read the content of the uploaded file
-    content = await participant_file.read()
+    async with aiofiles.open(csv_file_path, "wb") as buffer:
 
-    # Check if the content is a valid CSV
-    if not is_valid_csv(content.decode()):
-        return {"status_code": 400, "message": "Invalid CSV file"}
+        # Read the content of the uploaded file
+        content = await participant_file.read()
+
+        # Check if the content is a valid CSV
+        if not is_valid_csv(content.decode()):
+            return {"status_code": 400, "message": "Invalid CSV file"}
+    
+        await buffer.write(content)
 
     # get certificate temple path
     certificate_file = "./Data/Event_Certificate_Template.docx"
 
     # get participants
-    list_participate = await process_csv(participant_file);
+    list_participate = await process_csv(csv_file_path);
     
     await create_docx_files(certificate_file, list_participate, event=event_name, ambassador=ambassador_name)
 
@@ -208,9 +219,7 @@ async def generate_certificates(
 
     zip_folder("./Output/PDF", zip_filename, additional_files)
 
-    
-
-    return StreamingResponse(get_data_from_file(), media_type="application/zip")
+    return FileResponse(zip_filename, media_type="application/octet-stream", filename="certificates.zip")
 
 if __name__ == '__main__':
     # Run the app with Uvicorn

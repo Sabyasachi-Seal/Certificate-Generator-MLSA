@@ -1,3 +1,4 @@
+import re
 import os
 import csv
 import zipfile
@@ -138,6 +139,9 @@ async def create_docx_files(filename, list_participate, event, ambassador):
     os.system("rm -rf Output/PDF/*")
 
     for index, participate in enumerate(list_participate):
+        
+        participate['Name'] = participate.pop(next(key for key in participate if re.search(r'\bName\b', key)))
+
         # use original file everytime
         name = participate["Name"]
         email = participate["Email"]

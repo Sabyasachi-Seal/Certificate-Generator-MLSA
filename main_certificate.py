@@ -1,6 +1,6 @@
 
 import os
-
+import re
 #os.system("pip install -r requirements.txt")
 
 import csv
@@ -61,7 +61,8 @@ def create_docx_files(filename, list_participate):
     for index, participate in enumerate(list_participate):
         # use original file everytime
         doc = Document(filename)
-
+        participate['Name'] = participate.pop(next(key for key in participate if re.search(r'\bName\b', key)))
+        participate['Email'] = participate.pop(next(key for key in participate if re.search(r'\bEmail\b', key)))
         name = participate["Name"]
         email = participate["Email"]
 

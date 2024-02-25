@@ -1,6 +1,6 @@
 # Microsoft Learn Student Ambassador Certificate Generator
 
-### Use it now: https://mlsa-certificate-generator.iamseal.tech/
+### Use it now: [https://mlsa-certificate-generator.iamseal.tech/](https://mlsa-certificate-generator.sabyasachiseal.com/)
 
 ---
 

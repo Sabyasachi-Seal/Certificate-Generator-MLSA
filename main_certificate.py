@@ -19,7 +19,8 @@ from certificate import (
     replace_event_name,
     replace_ambassador_name,
 )
-import threading
+
+from threading import Thread, Semaphore
 import sys
 
 app = FastAPI()
@@ -32,6 +33,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+MAX_THREADS = 2
+
+semaphore = Semaphore(MAX_THREADS)
 
 # Serve static files (e.g., CSS, JS) from the 'static' folder
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -184,7 +189,13 @@ def zip_folder(folder_path, zip_filename, additional_files):
 
 
 def worker(index, participate, wb, sheet, event, ambassador, filename):
-    make_certificates(index, participate, wb, sheet, event, ambassador, filename)
+    # Acquire a semaphore
+    semaphore.acquire()
+    try:
+        make_certificates(index, participate, wb, sheet, event, ambassador, filename)
+    finally:
+        # Release the semaphore
+        semaphore.release()
 
 
 def make_certificates(index, participate, wb, sheet, event, ambassador, filename):
@@ -241,7 +252,7 @@ async def create_docx_files(filename, list_participate, event, ambassador):
 
     threads = []
     for index, participate in enumerate(list_participate):
-        t = threading.Thread(
+        t = Thread(
             target=worker,
             args=(index, participate, wb, sheet, event, ambassador, filename),
         )

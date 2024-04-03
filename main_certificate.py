@@ -34,7 +34,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-MAX_THREADS = 2
+MAX_THREADS = 1
 
 semaphore = Semaphore(MAX_THREADS)
 
@@ -154,12 +154,7 @@ def convert_to_pdf(source, folder, timeout=None):
     process = subprocess.run(
         args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=timeout
     )
-    filename = re.search("-> (.*?) using filter", process.stdout.decode())
-
-    if filename is None:
-        raise LibreOfficeError(process.stdout.decode())
-    else:
-        return filename.group(1)
+    print(process.stdout, process.stderr)
 
 
 def convert_to_pdf_old(input_path, output_path):
@@ -250,18 +245,24 @@ async def create_docx_files(filename, list_participate, event, ambassador):
     os.system("rm -rf Output/Doc/*")
     os.system("rm -rf Output/PDF/*")
 
-    threads = []
-    for index, participate in enumerate(list_participate):
-        t = Thread(
-            target=worker,
-            args=(index, participate, wb, sheet, event, ambassador, filename),
-        )
-        threads.append(t)
-        t.start()
+    # List of all tasks
+    tasks = list(enumerate(list_participate))
 
-    # Wait for all threads to finish
-    for t in threads:
-        t.join()
+    while tasks:
+        threads = []
+        # Start MAX_THREADS threads
+        for _ in range(min(MAX_THREADS, len(tasks))):
+            index, participate = tasks.pop(0)
+            t = Thread(
+                target=worker,
+                args=(index, participate, wb, sheet, event, ambassador, filename),
+            )
+            t.start()
+            threads.append(t)
+
+        # Wait for these threads to finish
+        for t in threads:
+            t.join()
 
 
 @app.get("/", response_class=HTMLResponse)

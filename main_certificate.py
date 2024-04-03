@@ -19,6 +19,8 @@ from certificate import (
     replace_event_name,
     replace_ambassador_name,
 )
+import threading
+import sys
 
 app = FastAPI()
 
@@ -121,11 +123,45 @@ async def process_csv(csv_file):
     return participant_list
 
 
-def convert_to_pdf(input_path, output_path):
+def libreoffice_exec():
+    # TODO: Provide support for more platforms
+    if sys.platform == "darwin":
+        return "/Applications/LibreOffice.app/Contents/MacOS/soffice"
+    return "libreoffice"
+
+
+class LibreOfficeError(Exception):
+    def __init__(self, output):
+        self.output = output
+
+
+def convert_to_pdf(source, folder, timeout=None):
+    args = [
+        libreoffice_exec(),
+        "--headless",
+        "--convert-to",
+        "pdf",
+        "--outdir",
+        folder,
+        source,
+    ]
+
+    process = subprocess.run(
+        args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=timeout
+    )
+    filename = re.search("-> (.*?) using filter", process.stdout.decode())
+
+    if filename is None:
+        raise LibreOfficeError(process.stdout.decode())
+    else:
+        return filename.group(1)
+
+
+def convert_to_pdf_old(input_path, output_path):
     cmd = ["unoconv", "-f", "pdf", "-o", output_path, input_path]
     process = subprocess.Popen(cmd, stderr=subprocess.PIPE)
     output, error = process.communicate()
-    # print(output, error)
+    print(output, error)
     return False, error
 
 
@@ -147,40 +183,36 @@ def zip_folder(folder_path, zip_filename, additional_files):
                 zipf.write(file_path, arcname)
 
 
-async def create_docx_files(filename, list_participate, event, ambassador):
+def worker(index, participate, wb, sheet, event, ambassador, filename):
+    make_certificates(index, participate, wb, sheet, event, ambassador, filename)
 
-    wb, sheet = getworkbook(mailerpath)
 
-    clear_mailer_file(wb, sheet)
+def make_certificates(index, participate, wb, sheet, event, ambassador, filename):
+    print(participate)
 
-    os.system("rm -rf Output/Doc/*")
-    os.system("rm -rf Output/PDF/*")
+    name = participate["Name"]
+    email = participate["Email"]
 
-    for index, participate in enumerate(list_participate):
+    if email == "" or name == "":
+        return
 
-        print(participate)
+    doc = Document(filename)
 
-        name = participate["Name"]
-        email = participate["Email"]
+    replace_participant_name(doc, name)
+    replace_event_name(doc, event)
+    replace_ambassador_name(doc, ambassador)
 
-        if email == "" or name == "":
-            continue
+    doc.save("./Output/Doc/{}.docx".format(name))
 
-        doc = Document(filename)
+    convert_to_pdf(
+        "./Output/Doc/{}.docx".format(name), "./Output/PDF/{}.pdf".format(name)
+    )
 
-        replace_participant_name(doc, name)
-        replace_event_name(doc, event)
-        replace_ambassador_name(doc, ambassador)
+    filepath = os.path.abspath("./Output/PDF/{}.pdf".format(name))
 
-        doc.save("./Output/Doc/{}.docx".format(name))
+    sub, body = getmail(name, event, ambassador)
 
-        convert_to_pdf(
-            "./Output/Doc/{}.docx".format(name), "./Output/PDF/{}.pdf".format(name)
-        )
-
-        filepath = os.path.abspath("./Output/PDF/{}.pdf".format(name))
-
-        sub, body = getmail(name, event, ambassador)
+    if wb and sheet:
 
         updatemailer(
             row=index + 2,
@@ -192,6 +224,33 @@ async def create_docx_files(filename, list_participate, event, ambassador):
             body=body,
             status="Send",
         )
+
+
+async def create_docx_files(filename, list_participate, event, ambassador):
+
+    try:
+        wb, sheet = getworkbook(mailerpath)
+    except Exception as e:
+        print(e)
+        wb, sheet = None, None
+
+    clear_mailer_file(wb, sheet) if wb and sheet else None
+
+    os.system("rm -rf Output/Doc/*")
+    os.system("rm -rf Output/PDF/*")
+
+    threads = []
+    for index, participate in enumerate(list_participate):
+        t = threading.Thread(
+            target=worker,
+            args=(index, participate, wb, sheet, event, ambassador, filename),
+        )
+        threads.append(t)
+        t.start()
+
+    # Wait for all threads to finish
+    for t in threads:
+        t.join()
 
 
 @app.get("/", response_class=HTMLResponse)

@@ -12,3 +12,4 @@ fastapi
 jinja2
 python-multipart
 aiofiles
+setuptools==35.0.1

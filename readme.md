@@ -1,13 +1,25 @@
 # Microsoft Learn Student Ambassador Certificate Automation
 
-### Check out this video below:
+### Event done ? Ready to send certificates ? 
+
+### Click here to access certificate generator: https://mlsa-certificate-generator.sabyasachiseal.com/
+
+
+### Other event related details, links and rules: https://stdntpartners.sharepoint.com/sites/SAProgramHandbook/SitePages/Hosting-Events.aspx 
+
+
+---
+<h1>Instructions Below are for you to run this project locally. Use <code>master</code> branch for the same </h1>
+
+
+### Tutorial Video for running locally:
 
 [![IMAGE ALT TEXT](http://img.youtube.com/vi/OUAbqdLDTZQ/0.jpg)](http://www.youtube.com/watch?v=OUAbqdLDTZQ "How to use Certificate Generator MLSA")
 
 This repo simply use a template certificate docx file and generates certificates
 both docx and pdf.
 
-###  Working on Windows only.
+###  Automatic Mail Working on Windows 10 only.
 
 ## Run these commands in your terminal
 
@@ -39,9 +51,6 @@ python main_certificate.py
 - All you need to do is to search for ```View Macros```  in excel and then select the ```Send_Mails``` macro and then click on ```Run```.
 - Now open outlook and login.
 - Click on outbox and see the mails being sent one by one.
-
-## Further Releases (Planning)
-- Implementing for Linux users?
 
 <h2></h2>
 

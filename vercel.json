@@ -1,7 +1,0 @@
-{
-  "builds": [{ "src": "main_certificate.py", "use": "@vercel/python" }],
-  "routes": [{ "src": "/(.*)", "dest": "/main_certificate.py" }],
-  "env": {
-    "APP_MODULE": "app:main_certificate"
-  }
-}

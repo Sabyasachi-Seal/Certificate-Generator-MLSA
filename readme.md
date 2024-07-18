@@ -2,7 +2,7 @@
 
 ### Event done ? Ready to send certificates ? 
 
-### Click here to access certificate generator: https://mlsa-certificate-generator.sabyasachiseal.com/
+### Click here to access certificate generator: https://mlsa.sabyasachiseal.com/
 
 ### Tutorial
 

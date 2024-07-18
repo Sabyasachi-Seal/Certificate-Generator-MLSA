@@ -10,7 +10,7 @@
 
 - Generalize code.
 
-## Use it now: https://mlsa-certificate-generator.sabyasachiseal.com/
+## Use it now: [https://mlsa.sabyasachiseal.com/](https://mlsa.sabyasachiseal.com/)
 
 ### How to run manually ?
 

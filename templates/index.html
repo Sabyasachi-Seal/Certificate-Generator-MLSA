@@ -171,8 +171,41 @@
           generateButton.classList.add("bg-green-700");
           generateButton.onclick = () => initiateDownload();
           generateButton.classList.remove("animate-pulse");
+
+
+          createSendEmailsButton();
         }
       
+        function createSendEmailsButton() {
+            const sendEmailsButton = document.createElement("button");
+            sendEmailsButton.textContent = "Send Emails";
+            sendEmailsButton.id = "sendEmailsButton";
+            sendEmailsButton.className = "z-[2] mx-3 mt-3 inline-flex w-full items-center justify-center rounded-md border border-transparent bg-orange-600 px-4 py-2 font-medium text-black shadow-sm hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-5 sm:w-auto sm:text-sm";
+            sendEmailsButton.onclick = sendEmails;
+
+            // Append the button to the main content or another appropriate element
+            const mainContent = document.querySelector("main");
+            mainContent.appendChild(sendEmailsButton);
+        }
+
+        async function sendEmails() {
+            // Logic to send a POST request to the "/send_emails" endpoint
+            try {
+                const response = await fetch('/send_emails', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    // Add any required body or headers
+                });
+                const result = await response.json();
+                alert(result.message); // Or handle the response more gracefully
+            } catch (error) {
+                console.error('Error sending emails:', error);
+                alert('Failed to send emails.'); // Or handle the error more gracefully
+            }
+        }
+
         function initiateDownload() {
           const a = document.createElement("a");
           a.href = "certificates.zip";  // Update with the correct download link

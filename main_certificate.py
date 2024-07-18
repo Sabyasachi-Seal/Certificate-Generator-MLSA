@@ -5,6 +5,7 @@ import zipfile
 import uvicorn
 import subprocess
 import aiofiles
+import asyncio
 from docx import Document
 from typing import AsyncGenerator
 from openpyxl import load_workbook
@@ -19,11 +20,32 @@ from certificate import (
     replace_event_name,
     replace_ambassador_name,
 )
-
+from send_mails import send_email
 from threading import Thread, Semaphore
 import sys
 
+
+class Email:
+    def __init__(self, subject, email, html_content, attachment_path):
+        self.subject = subject
+        self.email = email
+        self.html_content = html_content
+        self.attachment_path = attachment_path
+
+    def send(self):
+        asyncio.create_task(
+            send_email(
+                subject=self.subject,
+                recipient=self.email,
+                html_content=self.body,
+                attachment_path=self.attachment_path,
+            )
+        )
+
+
 app = FastAPI()
+
+all_email_tasks = []
 
 origins = ["*"]  # Adjust this to your frontend's actual origin(s)
 app.add_middleware(
@@ -141,6 +163,7 @@ class LibreOfficeError(Exception):
 
 
 def convert_to_pdf(source, folder, timeout=None):
+
     args = [
         libreoffice_exec(),
         "--headless",
@@ -199,6 +222,8 @@ def make_certificates(index, participate, wb, sheet, event, ambassador, filename
     name = participate["Name"]
     email = participate["Email"]
 
+    name = name.replace(" ", "_")
+
     if email == "" or name == "":
         return
 
@@ -211,7 +236,8 @@ def make_certificates(index, participate, wb, sheet, event, ambassador, filename
     doc.save("./Output/Doc/{}.docx".format(name))
 
     convert_to_pdf(
-        "./Output/Doc/{}.docx".format(name), "./Output/PDF/{}.pdf".format(name)
+        "./Output/Doc/{}.docx".format(name),
+        "./Output/PDF/",
     )
 
     filepath = os.path.abspath("./Output/PDF/{}.pdf".format(name))
@@ -230,6 +256,15 @@ def make_certificates(index, participate, wb, sheet, event, ambassador, filename
             body=body,
             status="Send",
         )
+
+    all_email_tasks.append(
+        Email(
+            subject=sub,
+            email=email,
+            html_content=body,
+            attachment_path=filepath,
+        )
+    )
 
 
 async def create_docx_files(filename, list_participate, event, ambassador):
@@ -268,6 +303,28 @@ async def create_docx_files(filename, list_participate, event, ambassador):
 @app.get("/", response_class=HTMLResponse)
 def read_item(request: Request):
     return templates.TemplateResponse("index.html", context={"request": request})
+
+
+@app.post("/send_emails")
+async def send_emails():
+    global all_email_tasks
+
+    for email_task in all_email_tasks:
+        try:
+            await send_email(
+                subject=email_task.subject,
+                recipient=email_task.email,
+                html_content=email_task.html_content,
+                attachment_path=email_task.attachment_path,
+            )
+        except Exception as e:
+            print(f"Error sending email to {email_task.email}: {e}")
+            continue
+
+    # Clear the tasks list after processing
+    all_email_tasks.clear()
+
+    return {"message": "Emails sent successfully"}
 
 
 @app.get("/{filepath}")

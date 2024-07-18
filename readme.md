@@ -4,6 +4,8 @@
 
 ### Click here to access certificate generator: https://mlsa.sabyasachiseal.com/
 
+Backup website: https://mlsa-2.sabyasachiseal.com/ (Takes time to load)
+
 ### Tutorial
 
 1. Enter your name and event name, and select a CSV file (probably from registration form. Make sure the csv file you upload has a "Name" and "Email" column.

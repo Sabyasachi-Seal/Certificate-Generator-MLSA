@@ -222,8 +222,6 @@ def make_certificates(index, participate, wb, sheet, event, ambassador, filename
     name = participate["Name"]
     email = participate["Email"]
 
-    name = name.replace(" ", "_")
-
     if email == "" or name == "":
         return
 

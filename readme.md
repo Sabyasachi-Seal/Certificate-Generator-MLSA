@@ -20,6 +20,13 @@ Backup website: https://mlsa-2.sabyasachiseal.com/ (Takes time to load)
    ![image](https://github.com/user-attachments/assets/1fcefcbf-4cc0-4e4a-8bee-89a130473b10)
 
 
+Example of what the participants receive on thier mail:
+![image](https://github.com/user-attachments/assets/8598c318-4737-4197-b8b6-e542ae95588f)
+
+And the certificates are attached as such:
+![image](https://github.com/user-attachments/assets/20f151cf-8267-4de4-a128-f5356d706ece)
+
+
 ---
 
 ### Other event related details, links and rules: https://stdntpartners.sharepoint.com/sites/SAProgramHandbook/SitePages/Hosting-Events.aspx 

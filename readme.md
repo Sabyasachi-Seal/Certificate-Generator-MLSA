@@ -4,6 +4,9 @@
 
 ### Click here to access certificate generator: https://mlsa-certificate-generator.sabyasachiseal.com/
 
+Make sure the csv file you upload has a "Name" and "Email" column. 
+
+---
 
 ### Other event related details, links and rules: https://stdntpartners.sharepoint.com/sites/SAProgramHandbook/SitePages/Hosting-Events.aspx 
 

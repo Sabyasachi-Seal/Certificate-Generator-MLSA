@@ -24,7 +24,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . /app/
 
 # Expose the port that the app will run on
-EXPOSE 8000
+EXPOSE 80
 
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8

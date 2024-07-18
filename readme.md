@@ -4,7 +4,19 @@
 
 ### Click here to access certificate generator: https://mlsa-certificate-generator.sabyasachiseal.com/
 
-Make sure the csv file you upload has a "Name" and "Email" column. 
+### Tutorial
+
+1. Enter your name and event name, and select a CSV file (probably from registration form. Make sure the csv file you upload has a "Name" and "Email" column.
+![image](https://github.com/user-attachments/assets/e53cf703-a1c4-4968-a238-2b34d494a89c)
+
+   
+2. Click on Generate Certificates, it might take some time (it might feel like its stuck at 100%) but it will generate all the certificates.
+![image](https://github.com/user-attachments/assets/430e426c-2436-42f5-82db-7f33620bf9fb) ![image](https://github.com/user-attachments/assets/add03930-718f-4d83-8ed1-708d53cf229a)
+
+
+3. You can now click on "Send emails" and send all the certificates to the partcipants.
+   ![image](https://github.com/user-attachments/assets/1fcefcbf-4cc0-4e4a-8bee-89a130473b10)
+
 
 ---
 

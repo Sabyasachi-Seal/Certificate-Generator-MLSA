@@ -16,7 +16,7 @@ Backup website: https://mlsa-2.sabyasachiseal.com/ (Takes time to load)
 ![image](https://github.com/user-attachments/assets/430e426c-2436-42f5-82db-7f33620bf9fb) ![image](https://github.com/user-attachments/assets/add03930-718f-4d83-8ed1-708d53cf229a)
 
 
-3. You can now click on "Send emails" and send all the certificates to the partcipants.
+3. You can now click on "Send emails" and send all the certificates to the partcipants. Remember, all the emails might not reflect on the participants mails instantly, it might take upto 6 hours for a sent email to reflect on the participant's mailbox.
    ![image](https://github.com/user-attachments/assets/1fcefcbf-4cc0-4e4a-8bee-89a130473b10)
 
 

@@ -23,8 +23,8 @@ from certificate import (
 from send_mails import send_email
 from threading import Thread, Semaphore
 import sys
-
-
+from typing import List
+import time
 class Email:
     def __init__(self, subject, email, html_content, attachment_path):
         self.subject = subject
@@ -33,11 +33,11 @@ class Email:
         self.attachment_path = attachment_path
 
     def send(self):
-        asyncio.create_task(
+        return asyncio.create_task(
             send_email(
                 subject=self.subject,
                 recipient=self.email,
-                html_content=self.body,
+                html_content=self.html_content,
                 attachment_path=self.attachment_path,
             )
         )
@@ -45,7 +45,7 @@ class Email:
 
 app = FastAPI()
 
-all_email_tasks = []
+all_email_tasks:List[Email]  = []
 
 origins = ["*"]  # Adjust this to your frontend's actual origin(s)
 app.add_middleware(
@@ -306,18 +306,18 @@ def read_item(request: Request):
 @app.post("/send_emails")
 async def send_emails():
     global all_email_tasks
-
     for email_task in all_email_tasks:
         try:
-            await send_email(
-                subject=email_task.subject,
-                recipient=email_task.email,
-                html_content=email_task.html_content,
-                attachment_path=email_task.attachment_path,
-            )
+            task = email_task.send()
+            results = await asyncio.gather(task, return_exceptions=True)
+            if isinstance(results[0], Exception):
+                raise results[0]
+            print(f"Email sent to {email_task.email}")
         except Exception as e:
             print(f"Error sending email to {email_task.email}: {e}")
             continue
+
+        time.sleep(2)
 
     # Clear the tasks list after processing
     all_email_tasks.clear()

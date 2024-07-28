@@ -1,7 +1,6 @@
-
 import os
 import re
-#os.system("pip install -r requirements.txt")
+# os.system("pip install -r requirements.txt")
 
 import csv
 from certificate import *
@@ -27,15 +26,18 @@ def updatemailer(row, workbook, sheet, email, filepath, sub, body, status, cc=""
     sheet.cell(row=row, column=4).value = body
     sheet.cell(row=row, column=5).value = filepath
     sheet.cell(row=row, column=6).value = status
-    workbook.save(filename = mailerpath)
+    workbook.save(filename=mailerpath)
+
 
 def getworkbook(filename):
     wb = load_workbook(filename=filename, read_only=False, keep_vba=True)
     sheet = wb.active
     return wb, sheet
 
+
 def gethtmltemplate(htmltemplatepath=htmltemplatepath):
     return open(htmltemplatepath, "r").read()
+
 
 def getmail(name, event, ambassador):
     sub = f"[MLSA] Certificate of Participation for {name}"
@@ -43,16 +45,17 @@ def getmail(name, event, ambassador):
     body = html.format(name=name, event=event, ambassador=ambassador)
     return sub, body
 
+
 def get_participants(f):
-    data = [] # create empty list
+    data = []  # create empty list
     with open(f, mode="r", encoding='iso-8859-1') as file:
         csv_reader = csv.DictReader(file)
         for row in csv_reader:
-            data.append(row)# append all results
+            data.append(row)  # append all results
     return data
 
-def create_docx_files(filename, list_participate):
 
+def create_docx_files(filename, list_participate):
     wb, sheet = getworkbook(mailerpath)
 
     event = input("Enter the event name: ")
@@ -82,19 +85,17 @@ def create_docx_files(filename, list_participate):
 
         sub, body = getmail(name, event, ambassador)
 
-        updatemailer(row=index+2, workbook=wb,  sheet=sheet, email=email, filepath=filepath, sub=sub, body=body, status="Send")
+        updatemailer(row=index + 2, workbook=wb, sheet=sheet, email=email, filepath=filepath, sub=sub, body=body,
+                     status="Send")
 
-    
+
 # get certificate temple path
 certificate_file = "Data/Event Certificate Template.docx"
 # get participants path
-participate_file = "Data/"+("ParticipantList.csv" if (input("Test Mode (Y/N): ").lower())[0]=="n" else "temp.csv")
+participate_file = "Data/" + ("ParticipantList.csv" if (input("Test Mode (Y/N): ").lower())[0] == "n" else "temp.csv")
 
 # get participants
 list_participate = get_participants(participate_file);
 
 # process data
 create_docx_files(certificate_file, list_participate)
-
-
-

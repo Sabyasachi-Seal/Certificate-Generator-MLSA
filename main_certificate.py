@@ -42,7 +42,6 @@ class Email:
             )
         )
 
-
 app = FastAPI()
 
 all_email_tasks:List[Email]  = []
@@ -297,6 +296,9 @@ async def create_docx_files(filename, list_participate, event, ambassador):
         for t in threads:
             t.join()
 
+@app.head("/")
+def read_root_head():
+    return {"message": "MLSA Certificate Generator is running"}
 
 @app.get("/", response_class=HTMLResponse)
 def read_item(request: Request):

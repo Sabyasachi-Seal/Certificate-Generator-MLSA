@@ -5,3 +5,9 @@
 python-docx
 docx2pdf
 openpyxl
+uvicorn
+aiofiles
+fastapi
+aiosmtplib
+python-dotenv
+python-multipart

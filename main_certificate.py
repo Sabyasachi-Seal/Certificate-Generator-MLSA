@@ -349,7 +349,8 @@ def is_valid_csv(file_content: str) -> bool:
 
 @app.get("/favicon.ico", include_in_schema=False)
 async def favicon():
-    favicon_path = "./static/favicon.ico"
+    dirname = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__))))
+    favicon_path = f"{dirname}/static/favicon.ico"
     if os.path.exists(favicon_path):
         return FileResponse(favicon_path)
     else:

@@ -327,7 +327,7 @@ async def send_emails():
     return {"message": "Emails sent successfully"}
 
 
-@app.get("/{filepath}")
+@app.get("/download/{filepath}")
 def get_file(filepath: str):
     file_path = os.path.join("./static", filepath)
     # print(file_path)

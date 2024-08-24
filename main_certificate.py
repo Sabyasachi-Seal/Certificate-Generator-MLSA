@@ -347,6 +347,13 @@ def is_valid_csv(file_content: str) -> bool:
     except csv.Error:
         return False
 
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    favicon_path = "./static/favicon.ico"
+    if os.path.exists(favicon_path):
+        return FileResponse(favicon_path)
+    else:
+        raise Exception(status_code=404, detail="Favicon not found")
 
 @app.post("/generate_certificates")
 async def generate_certificates(

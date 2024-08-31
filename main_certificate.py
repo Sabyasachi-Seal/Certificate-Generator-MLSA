@@ -334,7 +334,7 @@ async def send_emails():
 
 @app.get("/{filepath}")
 def get_file(filepath: str):
-    file_path = os.path.join("./static", filepath)
+    file_path = os.path.abspath(os.path.join("./static", filepath))
     # print(file_path)
     return FileResponse(file_path)
 

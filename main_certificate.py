@@ -25,6 +25,8 @@ from threading import Thread, Semaphore
 import sys
 from typing import List
 import time
+
+
 class Email:
     def __init__(self, subject, email, html_content, attachment_path):
         self.subject = subject
@@ -42,9 +44,10 @@ class Email:
             )
         )
 
+
 app = FastAPI()
 
-all_email_tasks:List[Email]  = []
+all_email_tasks: List[Email] = []
 
 origins = ["*"]  # Adjust this to your frontend's actual origin(s)
 app.add_middleware(
@@ -296,9 +299,11 @@ async def create_docx_files(filename, list_participate, event, ambassador):
         for t in threads:
             t.join()
 
+
 @app.head("/")
 def read_root_head():
     return {"message": "MLSA Certificate Generator is running"}
+
 
 @app.get("/", response_class=HTMLResponse)
 def read_item(request: Request):
@@ -327,7 +332,7 @@ async def send_emails():
     return {"message": "Emails sent successfully"}
 
 
-@app.get("/download/{filepath}")
+@app.get("/{filepath}")
 def get_file(filepath: str):
     file_path = os.path.join("./static", filepath)
     # print(file_path)
@@ -347,14 +352,6 @@ def is_valid_csv(file_content: str) -> bool:
     except csv.Error:
         return False
 
-@app.get("/favicon.ico", include_in_schema=False)
-async def favicon():
-    dirname = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__))))
-    favicon_path = f"{dirname}/static/favicon.ico"
-    if os.path.exists(favicon_path):
-        return FileResponse(favicon_path)
-    else:
-        raise Exception(status_code=404, detail="Favicon not found")
 
 @app.post("/generate_certificates")
 async def generate_certificates(

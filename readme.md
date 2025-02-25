@@ -2,11 +2,9 @@
 
 ### Event done ? Ready to send certificates ? 
 
-### Click here to access certificate generator: https://mlsa-cg.sabyasachiseal.com/
+### Click here to access certificate generator: https://mlsa.sabyasachiseal.com/
 
-Backup website 1: [https://mlsa.sabyasachiseal.com](https://mlsa.sabyasachiseal.com/)
-
-Backup website 2: https://mlsa-2.sabyasachiseal.com/ (Takes time to load)
+Backup website: https://mlsa-2.sabyasachiseal.com/ (Takes time to load)
 
 ### Tutorial
 

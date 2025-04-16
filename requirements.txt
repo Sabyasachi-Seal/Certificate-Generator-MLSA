@@ -11,3 +11,4 @@ fastapi
 aiosmtplib
 python-dotenv
 python-multipart
+python-dotenv

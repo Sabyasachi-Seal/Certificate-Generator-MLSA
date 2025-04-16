@@ -14,3 +14,4 @@ python-multipart
 aiofiles
 aiosmtplib
 setuptools==35.0.1
+python-dotenv
